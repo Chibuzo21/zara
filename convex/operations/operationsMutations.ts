@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Create new daily operation
@@ -12,7 +12,7 @@ export const create = mutation({
     cashVariance: v.number(),
     notes: v.optional(v.string()),
     status: v.union(v.literal("open"), v.literal("closed")),
-    loggedBy: v.optional(v.id("staff")),
+    // loggedBy: v.optional(v.id("staff")),
   },
   handler: async (ctx, args) => {
     // Check if operation already exists for this date

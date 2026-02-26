@@ -59,10 +59,25 @@ export default function InventoryPage() {
             Track stock levels, suppliers, and costs
           </p>
         </div>
-        <Link href='/inventory/new' className='btn-primary'>
-          <Plus size={20} className='inline mr-2' />
-          Add Item
-        </Link>
+        <div className='flex gap-3'>
+          <Link href='/inventory/purchase' className='btn-secondary'>
+            <Package size={20} className='inline mr-2' />
+            Purchase Order
+          </Link>
+          <Link
+            href='/inventory/usage'
+            className='bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors'>
+            <TrendingDown size={20} className='inline mr-2' />
+            Record Usage
+          </Link>
+          <Link href='/inventory/adjust' className='btn-outline'>
+            Adjust Stock
+          </Link>
+          <Link href='/inventory/new' className='btn-primary'>
+            <Plus size={20} className='inline mr-2' />
+            Add Item
+          </Link>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -77,7 +92,7 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <div className='bg-linear-to-br from-orange-500 to-orange-600 text-white rounded-lg p-6 shadow-lg'>
+        <div className='bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg p-6 shadow-lg'>
           <div className='flex items-center justify-between'>
             <div>
               <p className='text-white/80 text-sm'>Low Stock</p>
@@ -265,6 +280,23 @@ export default function InventoryPage() {
           </div>
         </div>
       )}
+
+      {/* Transaction History Link */}
+      <div className='card bg-blue-50 border-2 border-blue-200'>
+        <div className='flex items-center justify-between'>
+          <div>
+            <h3 className='font-bold text-blue-900 text-lg'>
+              Transaction History
+            </h3>
+            <p className='text-blue-700 text-sm mt-1'>
+              View all stock movements, purchases, and usage
+            </p>
+          </div>
+          <Link href='/inventory/transactions' className='btn-primary'>
+            View History
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

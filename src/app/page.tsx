@@ -26,14 +26,14 @@ import {
 } from "recharts";
 
 export default function Dashboard() {
-  const stats = useQuery(api.sales.getDashboardStats) as
+  const stats = useQuery(api.sales.sales.getDashboardStats) as
     | DashboardStats
     | undefined;
   const today = new Date().toISOString().split("T")[0];
   const monthStart = new Date();
   monthStart.setDate(1);
 
-  const topProducts = useQuery(api.sales.getTopProducts, {
+  const topProducts = useQuery(api.sales.sales.getTopProducts, {
     startDate: monthStart.toISOString().split("T")[0],
     endDate: today,
     limit: 5,

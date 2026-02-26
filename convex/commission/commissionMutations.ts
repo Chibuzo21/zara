@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Create commission record
@@ -16,7 +16,7 @@ export const create = mutation({
       v.literal("approved"),
       v.literal("paid"),
     ),
-    approvedBy: v.optional(v.id("staff")),
+    // approvedBy: v.optional(v.id("staff")),
     approvedAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -28,12 +28,11 @@ export const create = mutation({
 export const approve = mutation({
   args: {
     id: v.id("commissionRecords"),
-    approvedBy: v.id("staff"),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
       status: "approved",
-      approvedBy: args.approvedBy,
+
       approvedAt: new Date().toISOString(),
     });
     return args.id;

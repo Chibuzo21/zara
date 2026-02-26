@@ -1,51 +1,67 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // ============================================
-  // STAFF MANAGEMENT
-  // ============================================
+  // AUTH TABLES
+  ...authTables,
+  // Replace the users table definition entirely
+  users: defineTable({
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    // Your custom fields
+    fullName: v.optional(v.string()),
+    role: v.optional(v.string()),
+    staffId: v.optional(v.id("staff")),
+    isActive: v.optional(v.boolean()),
+    createdAt: v.optional(v.number()),
+  })
+    .index("email", ["email"])
+    .index("staffId", ["staffId"]),
+  // STAFF TABLES
   staff: defineTable({
     fullName: v.string(),
-    email: v.optional(v.string()),
+    email: v.string(),
     phone: v.optional(v.string()),
     role: v.union(
       v.literal("owner"),
       v.literal("production"),
       v.literal("packaging"),
       v.literal("sales"),
-      v.literal("admin"),
+      v.literal("transport_sales"),
     ),
     status: v.union(
       v.literal("active"),
       v.literal("inactive"),
       v.literal("suspended"),
     ),
-    dateHired: v.string(), // ISO date string
+    dateHired: v.string(),
     baseSalary: v.optional(v.number()),
     commissionRate: v.number(),
+    userId: v.optional(v.id("users")), // ✅ add this
   })
     .index("by_role", ["role"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_email", ["email"])
+    .index("userId", ["userId"]), // ✅ add this
 
   staffPerformance: defineTable({
     staffId: v.id("staff"),
     reviewDate: v.string(),
-    performanceScore: v.number(), // 0-5
-    attendanceScore: v.number(), // 0-5
-    qualityScore: v.number(), // 0-5
-    notes: v.optional(v.string()),
-    reviewedBy: v.id("staff"),
+    performanceScore: v.number(),
+    feedback: v.optional(v.string()),
+    reviewedBy: v.optional(v.id("staff")),
   }).index("by_staff", ["staffId"]),
 
-  // ============================================
-  // INVENTORY MANAGEMENT
-  // ============================================
+  // SUPPLIER & INVENTORY
   suppliers: defineTable({
     supplierName: v.string(),
     contactPerson: v.optional(v.string()),
-    phone: v.optional(v.string()),
     email: v.optional(v.string()),
+    phone: v.optional(v.string()),
     address: v.optional(v.string()),
     status: v.union(v.literal("active"), v.literal("inactive")),
   }).index("by_status", ["status"]),
@@ -67,9 +83,7 @@ export default defineSchema({
     unitCost: v.number(),
     supplierId: v.optional(v.id("suppliers")),
     status: v.union(v.literal("active"), v.literal("inactive")),
-  })
-    .index("by_category", ["category"])
-    .index("by_status", ["status"]),
+  }).index("by_status", ["status"]),
 
   inventoryTransactions: defineTable({
     itemId: v.id("inventoryItems"),
@@ -84,50 +98,36 @@ export default defineSchema({
     totalCost: v.optional(v.number()),
     supplierId: v.optional(v.id("suppliers")),
     notes: v.optional(v.string()),
-    loggedBy: v.optional(v.id("staff")),
-    transactionDate: v.string(), // ISO date string
+    loggedBy: v.optional(v.id("users")),
+    transactionDate: v.string(),
   })
     .index("by_item", ["itemId"])
     .index("by_date", ["transactionDate"]),
 
-  // ============================================
   // PRODUCTS & PRODUCTION
-  // ============================================
   products: defineTable({
     productName: v.string(),
-    category: v.union(
-      v.literal("bread"),
-      v.literal("cake"),
-      v.literal("pastry"),
-      v.literal("cookies"),
-      v.literal("custom"),
-    ),
+    category: v.string(),
     basePrice: v.number(),
     productionCost: v.optional(v.number()),
     status: v.union(v.literal("active"), v.literal("inactive")),
-  })
-    .index("by_category", ["category"])
-    .index("by_status", ["status"]),
+  }),
 
   productionLog: defineTable({
     productId: v.id("products"),
     quantityProduced: v.number(),
     productionDate: v.string(),
-    productionStaffId: v.optional(v.id("staff")),
-    packagingStaffId: v.optional(v.id("staff")),
-    qualityCheck: v.boolean(),
-    wasteQuantity: v.number(),
+    staffId: v.optional(v.id("staff")),
     notes: v.optional(v.string()),
   })
     .index("by_product", ["productId"])
     .index("by_date", ["productionDate"]),
 
-  // ============================================
-  // SALES & TRANSACTIONS
-  // ============================================
+  // SALES
   sales: defineTable({
     saleDate: v.string(),
     productId: v.id("products"),
+    productName: v.optional(v.string()),
     quantitySold: v.number(),
     unitPrice: v.number(),
     totalAmount: v.number(),
@@ -140,26 +140,22 @@ export default defineSchema({
     ),
     customerName: v.optional(v.string()),
     notes: v.optional(v.string()),
+    recordedBy: v.optional(v.id("users")),
+    saleType: v.optional(v.union(v.literal("shop"), v.literal("transport"))),
+    location: v.optional(v.string()),
   })
     .index("by_date", ["saleDate"])
     .index("by_product", ["productId"])
-    .index("by_staff", ["salesStaffId"]),
+    .index("by_staff", ["salesStaffId"])
+    .index("by_recorded_by", ["recordedBy"]),
 
-  // ============================================
-  // COMMISSION SYSTEM
-  // ============================================
+  // COMMISSION
   commissionConfig: defineTable({
-    role: v.union(
-      v.literal("production"),
-      v.literal("packaging"),
-      v.literal("sales"),
-    ),
+    role: v.string(),
     baseRate: v.number(),
     tierThreshold: v.optional(v.number()),
     tierRate: v.optional(v.number()),
-    effectiveFrom: v.string(),
-    effectiveTo: v.optional(v.string()),
-  }).index("by_role", ["role"]),
+  }),
 
   commissionRecords: defineTable({
     staffId: v.id("staff"),
@@ -174,36 +170,29 @@ export default defineSchema({
       v.literal("approved"),
       v.literal("paid"),
     ),
-    approvedBy: v.optional(v.id("staff")),
+    approvedBy: v.optional(v.id("users")),
     approvedAt: v.optional(v.string()),
-  })
-    .index("by_staff", ["staffId"])
-    .index("by_status", ["status"])
-    .index("by_period", ["periodStart", "periodEnd"]),
+  }).index("by_staff", ["staffId"]),
 
   commissionDeductions: defineTable({
-    commissionRecordId: v.id("commissionRecords"),
-    deductionType: v.union(
-      v.literal("lateness"),
-      v.literal("absence"),
-      v.literal("quality_issue"),
-      v.literal("shortage"),
-      v.literal("other"),
-    ),
+    commissionId: v.id("commissionRecords"),
+    deductionType: v.string(),
     amount: v.number(),
-    description: v.optional(v.string()),
-    appliedBy: v.optional(v.id("staff")),
-  }).index("by_record", ["commissionRecordId"]),
+    reason: v.optional(v.string()),
+  }),
 
-  // ============================================
-  // IMPREST MANAGEMENT
-  // ============================================
+  // IMPREST
   imprestRequests: defineTable({
     requestNumber: v.string(),
     requestedBy: v.id("staff"),
     amountRequested: v.number(),
     purpose: v.string(),
     requestDate: v.string(),
+    approvedBy: v.optional(v.id("users")),
+    approvedDate: v.optional(v.string()),
+    disbursedDate: v.optional(v.string()),
+    retirementDate: v.optional(v.string()),
+    notes: v.optional(v.string()),
     status: v.union(
       v.literal("pending"),
       v.literal("approved"),
@@ -211,26 +200,19 @@ export default defineSchema({
       v.literal("retired"),
       v.literal("rejected"),
     ),
-    approvedBy: v.optional(v.id("staff")),
-    approvedDate: v.optional(v.string()),
-    disbursedDate: v.optional(v.string()),
-    retirementDate: v.optional(v.string()),
-    notes: v.optional(v.string()),
   })
-    .index("by_request_number", ["requestNumber"])
     .index("by_status", ["status"])
-    .index("by_staff", ["requestedBy"]),
+    .index("by_requested_by", ["requestedBy"]),
 
   imprestRetirements: defineTable({
-    imprestRequestId: v.id("imprestRequests"),
-    itemDescription: v.string(),
+    imprestId: v.id("imprestRequests"),
     amountSpent: v.number(),
-    receiptNumber: v.optional(v.string()),
-  }).index("by_request", ["imprestRequestId"]),
+    receipts: v.optional(v.string()),
+    retirementDate: v.string(),
+    notes: v.optional(v.string()),
+  }),
 
-  // ============================================
-  // DAILY OPERATIONS LOG
-  // ============================================
+  // OPERATIONS
   dailyOperations: defineTable({
     operationDate: v.string(),
     openingCash: v.number(),
@@ -238,24 +220,61 @@ export default defineSchema({
     totalSales: v.number(),
     totalExpenses: v.number(),
     cashVariance: v.number(),
-    loggedBy: v.optional(v.id("staff")),
     notes: v.optional(v.string()),
     status: v.union(v.literal("open"), v.literal("closed")),
-  })
-    .index("by_date", ["operationDate"])
-    .index("by_status", ["status"]),
+    loggedBy: v.optional(v.id("users")),
+  }).index("by_date", ["operationDate"]),
 
   dailyExpenses: defineTable({
-    dailyOperationId: v.id("dailyOperations"),
-    expenseCategory: v.union(
-      v.literal("utilities"),
-      v.literal("transport"),
-      v.literal("maintenance"),
-      v.literal("supplies"),
-      v.literal("other"),
-    ),
+    operationId: v.id("dailyOperations"),
+    expenseCategory: v.string(),
     amount: v.number(),
     description: v.optional(v.string()),
-    receiptNumber: v.optional(v.string()),
-  }).index("by_operation", ["dailyOperationId"]),
+  }),
+
+  // PACKAGING
+  packagingTasks: defineTable({
+    productId: v.id("products"),
+    productionLogId: v.optional(v.id("productionLog")),
+    targetQuantity: v.number(),
+    packedQuantity: v.number(),
+    assignedTo: v.optional(v.id("staff")),
+    taskDate: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+    ),
+    startedAt: v.optional(v.string()),
+    completedAt: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  })
+    .index("by_date", ["taskDate"])
+    .index("by_status", ["status"])
+    .index("by_assigned", ["assignedTo"]),
+
+  // ATTENDANCE
+  attendance: defineTable({
+    staffId: v.id("staff"),
+    userId: v.optional(v.id("users")),
+    date: v.string(),
+    clockInTime: v.optional(v.string()),
+    clockOutTime: v.optional(v.string()),
+    clockInLat: v.optional(v.number()),
+    clockInLng: v.optional(v.number()),
+    clockOutLat: v.optional(v.number()),
+    clockOutLng: v.optional(v.number()),
+    distanceFromBakery: v.optional(v.number()),
+    status: v.union(
+      v.literal("present"),
+      v.literal("absent"),
+      v.literal("late"),
+      v.literal("half_day"),
+    ),
+    locationVerified: v.boolean(),
+    notes: v.optional(v.string()),
+  })
+    .index("by_staff", ["staffId"])
+    .index("by_date", ["date"])
+    .index("by_staff_and_date", ["staffId", "date"]),
 });

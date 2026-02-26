@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query } from "../_generated/server";
 
 // Get all imprest requests
 export const getAll = query({

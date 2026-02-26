@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query } from "../_generated/server";
 import { v } from "convex/values";
 
 // Get all inventory items
@@ -46,5 +46,28 @@ export const getWithTransactions = query({
       .take(20);
 
     return { item, transactions };
+  },
+});
+
+// Get all transactions with item and supplier details
+export const getTransactions = query({
+  handler: async (ctx) => {
+    const transactions = await ctx.db
+      .query("inventoryTransactions")
+      .withIndex("by_date")
+      .order("desc")
+      .take(100);
+
+    const transactionsWithDetails = await Promise.all(
+      transactions.map(async (transaction) => {
+        const item = await ctx.db.get(transaction.itemId);
+        const supplier = transaction.supplierId
+          ? await ctx.db.get(transaction.supplierId)
+          : null;
+        return { ...transaction, item, supplier };
+      }),
+    );
+
+    return transactionsWithDetails;
   },
 });

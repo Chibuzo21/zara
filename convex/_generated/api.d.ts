@@ -8,19 +8,27 @@
  * @module
  */
 
-import type * as commission from "../commission.js";
-import type * as commissionMutations from "../commissionMutations.js";
-import type * as imprest from "../imprest.js";
-import type * as imprestMutations from "../imprestMutations.js";
-import type * as inventory from "../inventory.js";
-import type * as inventoryMutations from "../inventoryMutations.js";
-import type * as operations from "../operations.js";
-import type * as operationsMutations from "../operationsMutations.js";
-import type * as sales from "../sales.js";
-import type * as salesMutations from "../salesMutations.js";
-import type * as staff from "../staff.js";
-import type * as staffMutation from "../staffMutation.js";
+import type * as Myauth from "../Myauth.js";
+import type * as auth from "../auth.js";
+import type * as commission_commission from "../commission/commission.js";
+import type * as commission_commissionMutations from "../commission/commissionMutations.js";
+import type * as http from "../http.js";
+import type * as imprest_imprest from "../imprest/imprest.js";
+import type * as imprest_imprestMutations from "../imprest/imprestMutations.js";
+import type * as inventory_inventory from "../inventory/inventory.js";
+import type * as inventory_inventoryMutations from "../inventory/inventoryMutations.js";
+import type * as operations_operations from "../operations/operations.js";
+import type * as operations_operationsMutations from "../operations/operationsMutations.js";
+import type * as packaging_packaging from "../packaging/packaging.js";
+import type * as production_production from "../production/production.js";
+import type * as production_products from "../production/products.js";
+import type * as production_productsMutations from "../production/productsMutations.js";
+import type * as sales_sales from "../sales/sales.js";
+import type * as sales_salesMutations from "../sales/salesMutations.js";
+import type * as staffs_staff from "../staffs/staff.js";
+import type * as staffs_staffMutation from "../staffs/staffMutation.js";
 import type * as suppliers from "../suppliers.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -29,19 +37,27 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  commission: typeof commission;
-  commissionMutations: typeof commissionMutations;
-  imprest: typeof imprest;
-  imprestMutations: typeof imprestMutations;
-  inventory: typeof inventory;
-  inventoryMutations: typeof inventoryMutations;
-  operations: typeof operations;
-  operationsMutations: typeof operationsMutations;
-  sales: typeof sales;
-  salesMutations: typeof salesMutations;
-  staff: typeof staff;
-  staffMutation: typeof staffMutation;
+  Myauth: typeof Myauth;
+  auth: typeof auth;
+  "commission/commission": typeof commission_commission;
+  "commission/commissionMutations": typeof commission_commissionMutations;
+  http: typeof http;
+  "imprest/imprest": typeof imprest_imprest;
+  "imprest/imprestMutations": typeof imprest_imprestMutations;
+  "inventory/inventory": typeof inventory_inventory;
+  "inventory/inventoryMutations": typeof inventory_inventoryMutations;
+  "operations/operations": typeof operations_operations;
+  "operations/operationsMutations": typeof operations_operationsMutations;
+  "packaging/packaging": typeof packaging_packaging;
+  "production/production": typeof production_production;
+  "production/products": typeof production_products;
+  "production/productsMutations": typeof production_productsMutations;
+  "sales/sales": typeof sales_sales;
+  "sales/salesMutations": typeof sales_salesMutations;
+  "staffs/staff": typeof staffs_staff;
+  "staffs/staffMutation": typeof staffs_staffMutation;
   suppliers: typeof suppliers;
+  users: typeof users;
 }>;
 
 /**

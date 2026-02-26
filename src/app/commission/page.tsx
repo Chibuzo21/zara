@@ -1,15 +1,49 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { formatCurrency, formatDate } from "../../../lib/utils";
-import { Plus, DollarSign, CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { Plus, DollarSign, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export default function CommissionPage() {
-  const records = useQuery(api.commission?.getAll) || [];
+  const records = useQuery(api.commission.getAll) || [];
+  const approveCommission = useMutation(api.commissionMutations.approve);
+  const markAsPaid = useMutation(api.commissionMutations.markAsPaid);
+
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleApprove = async (id: Id<"commissionRecords">) => {
+    if (!confirm("Approve this commission record?")) return;
+    setLoading(id);
+    try {
+      // TODO: Replace with actual current user ID
+      await approveCommission({ id });
+      alert("Commission approved!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to approve");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleMarkPaid = async (id: Id<"commissionRecords">) => {
+    if (!confirm("Mark this commission as paid?")) return;
+    setLoading(id);
+    try {
+      await markAsPaid({ id });
+      alert("Marked as paid!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to mark as paid");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   if (records === undefined) {
     return (
@@ -30,11 +64,9 @@ export default function CommissionPage() {
     paid: "bg-green-100 text-green-800",
   };
 
-  const roleColors: Record<string, string> = {
-    production: "bg-blue-100 text-blue-800",
-    packaging: "bg-green-100 text-green-800",
-    sales: "bg-yellow-100 text-yellow-800",
-  };
+  const pending = records.filter((r: any) => r.status === "pending");
+  const approved = records.filter((r: any) => r.status === "approved");
+  const paid = records.filter((r: any) => r.status === "paid");
 
   return (
     <div className='space-y-6'>
@@ -45,7 +77,7 @@ export default function CommissionPage() {
             Commission Management
           </h1>
           <p className='text-gray-600 mt-1'>
-            Track and manage staff commission payments
+            Approve and track staff commission payments
           </p>
         </div>
         <Link href='/commission/new' className='btn-primary'>
@@ -56,42 +88,44 @@ export default function CommissionPage() {
 
       {/* Summary Cards */}
       <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
-        <div className='stat-card'>
-          <p className='text-white/80 text-sm'>Total Pending</p>
-          <p className='text-3xl font-bold mt-2'>
+        <div className='bg-linear-to-br from-yellow-500 to-yellow-600 text-white rounded-lg p-6 shadow-lg'>
+          <p className='text-white/80 text-sm'>Pending Approval</p>
+          <p className='text-2xl font-bold mt-2'>
             {formatCurrency(
-              records
-                .filter((r: any) => r.status === "pending")
-                .reduce((sum: number, r: any) => sum + r.netCommission, 0),
+              pending.reduce((sum: number, r: any) => sum + r.netCommission, 0),
             )}
           </p>
+          <p className='text-sm mt-1 text-white/80'>{pending.length} records</p>
         </div>
 
-        <div className='bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg'>
+        <div className='bg-linear-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg'>
           <p className='text-white/80 text-sm'>Approved</p>
-          <p className='text-3xl font-bold mt-2'>
+          <p className='text-2xl font-bold mt-2'>
             {formatCurrency(
-              records
-                .filter((r: any) => r.status === "approved")
-                .reduce((sum: number, r: any) => sum + r.netCommission, 0),
+              approved.reduce(
+                (sum: number, r: any) => sum + r.netCommission,
+                0,
+              ),
             )}
+          </p>
+          <p className='text-sm mt-1 text-white/80'>
+            {approved.length} records
           </p>
         </div>
 
-        <div className='bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg'>
-          <p className='text-white/80 text-sm'>Paid This Month</p>
-          <p className='text-3xl font-bold mt-2'>
+        <div className='bg-linear-to-br from-green-500 to-green-600 text-white rounded-lg p-6 shadow-lg'>
+          <p className='text-white/80 text-sm'>Paid</p>
+          <p className='text-2xl font-bold mt-2'>
             {formatCurrency(
-              records
-                .filter((r: any) => r.status === "paid")
-                .reduce((sum: number, r: any) => sum + r.netCommission, 0),
+              paid.reduce((sum: number, r: any) => sum + r.netCommission, 0),
             )}
           </p>
+          <p className='text-sm mt-1 text-white/80'>{paid.length} records</p>
         </div>
 
-        <div className='bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg p-6 shadow-lg'>
+        <div className='bg-linear-to-br from-red-500 to-red-600 text-white rounded-lg p-6 shadow-lg'>
           <p className='text-white/80 text-sm'>Total Deductions</p>
-          <p className='text-3xl font-bold mt-2'>
+          <p className='text-2xl font-bold mt-2'>
             {formatCurrency(
               records.reduce(
                 (sum: number, r: any) => sum + r.deductions + r.penalties,
@@ -102,80 +136,84 @@ export default function CommissionPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className='card'>
-        <div className='flex gap-4'>
-          <div className='flex-1'>
-            <label className='label'>Filter by Status</label>
-            <select
-              className='input-field'
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value='all'>All Status</option>
-              <option value='pending'>Pending</option>
-              <option value='approved'>Approved</option>
-              <option value='paid'>Paid</option>
-            </select>
-          </div>
+      {/* Workflow */}
+      <div className='card bg-blue-50 border-2 border-blue-200'>
+        <h3 className='font-bold text-blue-900 mb-3'>📊 Commission Workflow</h3>
+        <div className='flex items-center gap-3 text-sm flex-wrap'>
+          <span className='px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg font-semibold border-2 border-yellow-300'>
+            1. Pending
+          </span>
+          <span className='text-blue-600 font-bold'>→ [Approve/Reject] →</span>
+          <span className='px-4 py-2 bg-blue-100 text-blue-800 rounded-lg font-semibold border-2 border-blue-300'>
+            2. Approved
+          </span>
+          <span className='text-blue-600 font-bold'>→ [Mark as Paid] →</span>
+          <span className='px-4 py-2 bg-green-100 text-green-800 rounded-lg font-semibold border-2 border-green-300'>
+            3. Paid ✓
+          </span>
         </div>
       </div>
 
-      {/* Commission Table */}
+      {/* Filters */}
+      <div className='card'>
+        <label className='label'>Filter by Status</label>
+        <select
+          className='input-field max-w-xs'
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value='all'>All Status ({records.length})</option>
+          <option value='pending'>Pending ({pending.length})</option>
+          <option value='approved'>Approved ({approved.length})</option>
+          <option value='paid'>Paid ({paid.length})</option>
+        </select>
+      </div>
+
+      {/* Table */}
       <div className='card overflow-hidden p-0'>
         <div className='overflow-x-auto'>
           <table className='w-full'>
             <thead>
               <tr className='bg-bakery-pink text-white'>
                 <th className='table-header'>Staff</th>
-                <th className='table-header'>Role</th>
                 <th className='table-header'>Period</th>
-                <th className='table-header'>Gross Commission</th>
+                <th className='table-header'>Gross</th>
                 <th className='table-header'>Deductions</th>
-                <th className='table-header'>Penalties</th>
-                <th className='table-header'>Net Commission</th>
+                <th className='table-header'>Net</th>
                 <th className='table-header'>Status</th>
+                <th className='table-header'>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={7}
                     className='table-cell text-center text-gray-500 py-8'>
-                    No commission records found
+                    No records found
                   </td>
                 </tr>
               ) : (
                 filteredRecords.map((record: any) => (
                   <tr key={record._id} className='hover:bg-gray-50'>
-                    <td className='table-cell'>
-                      <div>
-                        <p className='font-semibold'>Staff Name</p>
-                        <p className='text-sm text-gray-600'>EMP-XXX</p>
-                      </div>
-                    </td>
-                    <td className='table-cell'>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800`}>
-                        ROLE
-                      </span>
-                    </td>
-                    <td className='table-cell'>
-                      <div className='text-sm'>
-                        <div>{formatDate(record.periodStart)}</div>
-                        <div className='text-gray-600'>
-                          to {formatDate(record.periodEnd)}
-                        </div>
+                    <td className='table-cell font-semibold'>Staff Name</td>
+                    <td className='table-cell text-sm'>
+                      <div>{formatDate(record.periodStart)}</div>
+                      <div className='text-gray-600'>
+                        to {formatDate(record.periodEnd)}
                       </div>
                     </td>
                     <td className='table-cell font-semibold text-green-600'>
                       {formatCurrency(record.grossCommission)}
                     </td>
-                    <td className='table-cell font-semibold text-orange-600'>
-                      {formatCurrency(record.deductions)}
-                    </td>
-                    <td className='table-cell font-semibold text-red-600'>
-                      {formatCurrency(record.penalties)}
+                    <td className='table-cell text-sm'>
+                      <div className='text-orange-600'>
+                        -{formatCurrency(record.deductions)}
+                      </div>
+                      {record.penalties > 0 && (
+                        <div className='text-red-600'>
+                          -{formatCurrency(record.penalties)}
+                        </div>
+                      )}
                     </td>
                     <td className='table-cell font-bold text-bakery-pink text-lg'>
                       {formatCurrency(record.netCommission)}
@@ -186,6 +224,37 @@ export default function CommissionPage() {
                         {record.status.toUpperCase()}
                       </span>
                     </td>
+                    <td className='table-cell'>
+                      {record.status === "pending" && (
+                        <div className='flex gap-2'>
+                          <button
+                            onClick={() => handleApprove(record._id)}
+                            disabled={loading === record._id}
+                            className='px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded flex items-center gap-1'>
+                            <CheckCircle size={12} />
+                            Approve
+                          </button>
+                          <button className='px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded flex items-center gap-1'>
+                            <XCircle size={12} />
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                      {record.status === "approved" && (
+                        <button
+                          onClick={() => handleMarkPaid(record._id)}
+                          disabled={loading === record._id}
+                          className='px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded flex items-center gap-1'>
+                          <DollarSign size={12} />
+                          Mark Paid
+                        </button>
+                      )}
+                      {record.status === "paid" && (
+                        <span className='text-xs text-green-600 font-semibold'>
+                          ✓ Paid
+                        </span>
+                      )}
+                    </td>
                   </tr>
                 ))
               )}
@@ -194,35 +263,30 @@ export default function CommissionPage() {
         </div>
       </div>
 
-      {/* Commission Rates Reference */}
+      {/* Rates */}
       <div className='card'>
         <h2 className='text-xl font-bold text-gray-900 mb-4'>
           Commission Rates
         </h2>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div className='p-4 bg-blue-50 rounded-lg border-2 border-blue-200'>
-            <p className='font-semibold text-blue-900'>Production Staff</p>
-            <p className='text-2xl font-bold text-blue-600 mt-2'>2.0%</p>
-            <p className='text-sm text-blue-700 mt-1'>Base rate</p>
-            <p className='text-sm text-blue-700'>
-              Tier rate: 3.0% (above ₦100k)
-            </p>
+            <p className='font-semibold text-blue-900'>Production</p>
+            <p className='text-2xl font-bold text-blue-600 mt-2'>2.0% → 3.0%</p>
+            <p className='text-sm text-blue-700'>Tier at ₦100k</p>
           </div>
           <div className='p-4 bg-green-50 rounded-lg border-2 border-green-200'>
-            <p className='font-semibold text-green-900'>Packaging Staff</p>
-            <p className='text-2xl font-bold text-green-600 mt-2'>1.5%</p>
-            <p className='text-sm text-green-700 mt-1'>Base rate</p>
-            <p className='text-sm text-green-700'>
-              Tier rate: 2.5% (above ₦80k)
+            <p className='font-semibold text-green-900'>Packaging</p>
+            <p className='text-2xl font-bold text-green-600 mt-2'>
+              1.5% → 2.5%
             </p>
+            <p className='text-sm text-green-700'>Tier at ₦80k</p>
           </div>
           <div className='p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200'>
-            <p className='font-semibold text-yellow-900'>Sales Staff</p>
-            <p className='text-2xl font-bold text-yellow-600 mt-2'>5.0%</p>
-            <p className='text-sm text-yellow-700 mt-1'>Base rate</p>
-            <p className='text-sm text-yellow-700'>
-              Tier rate: 7.0% (above ₦150k)
+            <p className='font-semibold text-yellow-900'>Sales</p>
+            <p className='text-2xl font-bold text-yellow-600 mt-2'>
+              5.0% → 7.0%
             </p>
+            <p className='text-sm text-yellow-700'>Tier at ₦150k</p>
           </div>
         </div>
       </div>

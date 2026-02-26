@@ -9,7 +9,9 @@ import Link from "next/link";
 
 export default function NewOperationPage() {
   const router = useRouter();
-  const createOperation = useMutation(api.operationsMutations.create);
+  const createOperation = useMutation(
+    api.operations.operationsMutations.create,
+  );
 
   const [formData, setFormData] = useState({
     operationDate: new Date().toISOString().split("T")[0],

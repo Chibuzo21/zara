@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function OperationsPage() {
   // You'll need to create these queries in convex/operations.ts
-  const operations = useQuery(api.operations?.getAll) || [];
+  const operations = useQuery(api.operations.operations?.getAll) || [];
 
   const [dateFilter, setDateFilter] = useState("");
 

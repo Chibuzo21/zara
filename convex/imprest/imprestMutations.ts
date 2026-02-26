@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Create imprest request
@@ -32,7 +32,7 @@ export const approve = mutation({
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, {
       status: "approved",
-      approvedBy: args.approvedBy,
+      // approvedBy: args.approvedBy,
       approvedDate: new Date().toISOString().split("T")[0],
     });
     return args.id;

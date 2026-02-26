@@ -1,5 +1,63 @@
-import { query } from "./_generated/server";
+import { query } from "../_generated/server";
 import { v } from "convex/values";
+import { Id } from "../_generated/dataModel";
+// Get today's sales for a specific staff member (by userId)
+export const getTodayByUser = query({
+  args: {
+    userId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    const sales = await ctx.db
+      .query("sales")
+      .withIndex("by_date", (q) => q.eq("saleDate", today))
+      .collect();
+
+    // Filter by user if provided, otherwise return all today's sales
+    const filtered = args.userId
+      ? sales.filter((s) => s.recordedBy === args.userId)
+      : sales;
+
+    // Join with product details
+    const withProducts = await Promise.all(
+      filtered.map(async (sale) => {
+        const product = await ctx.db.get(sale.productId);
+        return { ...sale, product };
+      }),
+    );
+
+    return withProducts;
+  },
+});
+
+// Get sales by date range for a specific user
+export const getByUserAndDateRange = query({
+  args: {
+    userId: v.optional(v.id("users")),
+    startDate: v.string(),
+    endDate: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const sales = await ctx.db.query("sales").withIndex("by_date").collect();
+
+    const filtered = sales.filter(
+      (s) =>
+        s.saleDate >= args.startDate &&
+        s.saleDate <= args.endDate &&
+        (args.userId ? s.recordedBy === args.userId : true),
+    );
+
+    const withProducts = await Promise.all(
+      filtered.map(async (sale) => {
+        const product = await ctx.db.get(sale.productId);
+        return { ...sale, product };
+      }),
+    );
+
+    return withProducts;
+  },
+});
 
 // Get sales by date range
 export const getByDateRange = query({
@@ -16,6 +74,8 @@ export const getByDateRange = query({
     );
   },
 });
+
+// Get sales with product details
 
 // Get today's sales
 export const getToday = query({
@@ -168,9 +228,9 @@ export const getTopProducts = query({
     // Get product details and sort
     const products = await Promise.all(
       Array.from(productMap.values()).map(async (item) => {
-        const product = await ctx.db.get(item.productId as any);
+        const product = await ctx.db.get(item?.productId as Id<"products">);
         return {
-          // productName: product?.productName || "Unknown",
+          productName: product?.productName,
           quantity: item.quantity,
           amount: item.amount,
         };

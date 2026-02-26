@@ -10,8 +10,8 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
 
 export default function StaffPage() {
-  const staff = useQuery(api.staff.getAll);
-  const deleteStaff = useMutation(api.staffMutation.remove);
+  const staff = useQuery(api.staffs.staff.getAll);
+  const deleteStaff = useMutation(api.staffs.staffMutation.remove);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -27,6 +27,24 @@ export default function StaffPage() {
       alert("Failed to delete staff member");
     }
   };
+
+  if (staff === undefined) {
+    return (
+      <div className='flex items-center justify-center min-h-[60vh]'>
+        <div className='w-16 h-16 border-4 border-bakery-pink border-t-transparent rounded-full animate-spin'></div>
+      </div>
+    );
+  }
+  // const handleEdit = async (id: Id<"staff">) => {
+  //   if (!confirm("Are you sure you want to delete this staff member?")) return;
+
+  //   try {
+  //     await editStaff({ id });
+  //   } catch (error) {
+  //     console.error("Error editing staff record:", error);
+  //     alert("Failed to edit staff record");
+  //   }
+  // };
 
   if (staff === undefined) {
     return (
@@ -185,9 +203,12 @@ export default function StaffPage() {
                     </td>
                     <td className='table-cell'>
                       <div className='flex space-x-2'>
-                        <button className='p-2 text-blue-600 hover:bg-blue-50 rounded'>
+                        <Link
+                          href={`/staff/${member._id}/edit`}
+                          // onClick={() => handleEdit(member._id)}
+                          className='p-2 text-blue-600 hover:bg-blue-50 rounded'>
                           <Edit2 size={16} />
-                        </button>
+                        </Link>
                         <button
                           onClick={() => handleDelete(member._id)}
                           className='p-2 text-red-600 hover:bg-red-50 rounded'>

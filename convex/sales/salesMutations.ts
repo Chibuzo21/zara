@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 
 // Record a sale
@@ -9,6 +9,7 @@ export const create = mutation({
     quantitySold: v.number(),
     unitPrice: v.number(),
     totalAmount: v.number(),
+    productName: v.string(),
     salesStaffId: v.optional(v.id("staff")),
     paymentMethod: v.union(
       v.literal("cash"),
@@ -18,6 +19,9 @@ export const create = mutation({
     ),
     customerName: v.optional(v.string()),
     notes: v.optional(v.string()),
+    recordedBy: v.optional(v.id("users")),
+    saleType: v.optional(v.union(v.literal("shop"), v.literal("transport"))),
+    location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("sales", args);
