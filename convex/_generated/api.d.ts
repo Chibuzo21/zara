@@ -9,6 +9,7 @@
  */
 
 import type * as Myauth from "../Myauth.js";
+import type * as attendance from "../attendance.js";
 import type * as auth from "../auth.js";
 import type * as commission_commission from "../commission/commission.js";
 import type * as commission_commissionMutations from "../commission/commissionMutations.js";
@@ -38,6 +39,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   Myauth: typeof Myauth;
+  attendance: typeof attendance;
   auth: typeof auth;
   "commission/commission": typeof commission_commission;
   "commission/commissionMutations": typeof commission_commissionMutations;

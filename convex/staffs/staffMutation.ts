@@ -38,9 +38,6 @@ export const createStaff = action({
     if (!currentUser || currentUser.role !== "owner") {
       throw new Error("Only owner can create staff");
     }
-    if (!currentUser || currentUser.role !== "owner") {
-      throw new Error("Only owner can create staff");
-    }
 
     // 2. Create staff record first
     const staffId = await ctx.runMutation(
@@ -73,7 +70,7 @@ export const createStaff = action({
     });
 
     // 4. Link the user back to staff
-    const user = await ctx.runQuery(api.staffs.staff.getUserByEmail, {
+    const user = await ctx.runQuery(api.users.getUserByEmail, {
       email: args.email,
     });
     if (user) {
@@ -90,7 +87,7 @@ export const createStaff = action({
 export const linkUserToStaff = internalMutation({
   args: { staffId: v.id("staff"), userId: v.id("users") },
   handler: async (ctx, { staffId, userId }) => {
-    // await ctx.db.patch(staffId, { userId });
+    await ctx.db.patch(staffId, { userId });
     await ctx.db.patch(userId, { staffId });
   },
 });
@@ -191,6 +188,14 @@ export const editAction = action({
     password: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // check if user is owner
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const currentUser = await ctx.runQuery(api.users.getById, { id: userId });
+    if (!currentUser || currentUser.role !== "owner") {
+      throw new Error("Only owner can create staff");
+    }
     // 1. Update staff record
     await ctx.runMutation(internal.staffs.staffMutation.editStaff, {
       ...args,
@@ -202,6 +207,18 @@ export const editAction = action({
       // TODO: admin password reset requires a custom Password provider
       // Convex Auth doesn't support changing another user's password out of the box
       throw new Error("Password reset not yet supported");
+    } // 2. Update users table (name, email, role)
+    const user = await ctx.runQuery(api.users.getUserByStaffId, {
+      staffId: args.id,
+    });
+    console.log(user, "user info");
+    if (user?.staffId) {
+      await ctx.runMutation(internal.users.updateUser, {
+        userId: user?._id,
+        fullName: args.fullName,
+        email: args.email,
+        role: args.role,
+      });
     }
   },
 });

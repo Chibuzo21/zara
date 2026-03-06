@@ -2,23 +2,34 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-
-import { formatCurrency } from "../../../../lib/utils";
-import { Package, TrendingDown, DollarSign, AlertTriangle } from "lucide-react";
-import Link from "next/link";
-import StaffCommission from "./components/staffCommission";
+import { Doc } from "../../../../convex/_generated/dataModel";
 import { Id } from "../../../../convex/_generated/dataModel";
 
+import { TrendingDown } from "lucide-react";
+import Link from "next/link";
+
+import StaffCommission from "./components/staffCommission";
+import ProductionStats from "./components/productionStats";
+import ProductionActions from "./components/productionActions";
+import LowStock from "./components/LowStock";
+import { useRoleGuard } from "../../../../hooks/useRoleGuard";
+
+type InventoryItem = Doc<"inventoryItems">;
+
 export default function ProductionDashboardPage() {
+  const { isAllowed, isLoading } = useRoleGuard(["owner", "production"]);
   const user = useQuery(api.users.viewer);
-  const inventoryItems = useQuery(api.inventory.inventory.getAll) || [];
-  const lowStockItems = useQuery(api.inventory.inventory.getLowStock) || [];
+  const inventoryItems: InventoryItem[] =
+    useQuery(api.inventory.inventory.getAll) ?? [];
+  const lowStockItems: InventoryItem[] =
+    useQuery(api.inventory.inventory.getLowStock) ?? [];
 
   const lowStockCount = lowStockItems.length;
   const outOfStockCount = inventoryItems.filter(
-    (item: any) => item.currentStock === 0,
+    (item) => item.currentStock === 0,
   ).length;
 
+  if (isLoading || !isAllowed) return null;
   return (
     <div className='space-y-6'>
       {/* Header */}
@@ -27,166 +38,51 @@ export default function ProductionDashboardPage() {
           <h1 className='text-3xl font-bold text-gray-900'>
             Production Dashboard
           </h1>
-          <p className='text-gray-600 mt-1'>Welcome back, {user?.fullName}!</p>
+          <p className='text-gray-500 mt-1'>
+            Welcome back, {user?.fullName ?? "—"}
+          </p>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-        <div className='bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6 shadow-lg'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-white/80 text-sm'>Total Inventory Items</p>
-              <p className='text-3xl font-bold mt-2'>{inventoryItems.length}</p>
-            </div>
-            <Package size={40} className='text-white/50' />
-          </div>
-        </div>
-
-        <div className='bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg p-6 shadow-lg'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-white/80 text-sm'>Low Stock Items</p>
-              <p className='text-3xl font-bold mt-2'>{lowStockCount}</p>
-            </div>
-            <AlertTriangle size={40} className='text-white/50' />
-          </div>
-        </div>
-
-        <div className='bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg p-6 shadow-lg'>
-          <div className='flex items-center justify-between'>
-            <div>
-              <p className='text-white/80 text-sm'>Out of Stock</p>
-              <p className='text-3xl font-bold mt-2'>{outOfStockCount}</p>
-            </div>
-            <TrendingDown size={40} className='text-white/50' />
-          </div>
-        </div>
-      </div>
+      <ProductionStats
+        outOfStockCount={outOfStockCount}
+        lowStockCount={lowStockCount}
+        inventoryItems={inventoryItems}
+      />
 
       {/* Quick Actions */}
-      <div className='card'>
-        <h2 className='text-xl font-bold text-gray-900 mb-4'>Quick Actions</h2>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <Link
-            href='/inventory/usage'
-            className='p-6 bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-lg border-2 border-orange-200 transition-all'>
-            <TrendingDown size={32} className='text-orange-600 mb-3' />
-            <p className='font-semibold text-gray-900'>Record Usage</p>
-            <p className='text-sm text-gray-600 mt-1'>
-              Log materials used in production
-            </p>
-          </Link>
+      <ProductionActions />
 
+      {/* Stock Alert Banner */}
+      {lowStockCount > 0 && (
+        <div className='rounded-2xl border border-amber-100 bg-amber-50/60 px-5 py-4 flex items-start gap-4'>
+          <div className='mt-0.5 shrink-0 p-2 rounded-xl bg-amber-100 text-amber-600'>
+            <TrendingDown size={18} strokeWidth={2.5} />
+          </div>
+          <div className='flex-1 min-w-0'>
+            <p className='font-semibold text-amber-900 text-sm'>Stock Alert</p>
+            <p className='text-amber-700 text-sm mt-0.5'>
+              {lowStockCount} item{lowStockCount !== 1 ? "s" : ""} running low.
+              {outOfStockCount > 0 && (
+                <> {outOfStockCount} out of stock entirely.</>
+              )}{" "}
+              Notify the owner to reorder soon.
+            </p>
+          </div>
           <Link
             href='/inventory'
-            className='p-6 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg border-2 border-blue-200 transition-all'>
-            <Package size={32} className='text-blue-600 mb-3' />
-            <p className='font-semibold text-gray-900'>View Inventory</p>
-            <p className='text-sm text-gray-600 mt-1'>Check stock levels</p>
+            className='shrink-0 text-xs font-semibold text-amber-600 hover:text-amber-800 transition-colors whitespace-nowrap mt-0.5'>
+            View inventory →
           </Link>
-
-          <Link
-            href='/commission'
-            className='p-6 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-lg border-2 border-purple-200 transition-all'>
-            <DollarSign size={32} className='text-purple-600 mb-3' />
-            <p className='font-semibold text-gray-900'>My Commission</p>
-            <p className='text-sm text-gray-600 mt-1'>View your earnings</p>
-          </Link>
-        </div>
-      </div>
-
-      {/* Low Stock Alert */}
-      {lowStockCount > 0 && (
-        <div className='card bg-orange-50 border-2 border-orange-200'>
-          <div className='flex items-start gap-4'>
-            <AlertTriangle
-              size={24}
-              className='text-orange-600 flex-shrink-0 mt-1'
-            />
-            <div>
-              <h3 className='font-bold text-orange-900 text-lg'>
-                ⚠️ Stock Alert
-              </h3>
-              <p className='text-orange-800 mt-1'>
-                {lowStockCount} item{lowStockCount !== 1 ? "s" : ""} running low
-                on stock. Notify the owner to reorder soon.
-              </p>
-              <Link
-                href='/inventory'
-                className='text-orange-600 hover:underline text-sm font-semibold mt-2 inline-block'>
-                View low stock items →
-              </Link>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* Low Stock Items */}
-      <div className='card'>
-        <h2 className='text-xl font-bold text-gray-900 mb-4'>
-          Low Stock Items
-        </h2>
-        <div className='overflow-x-auto'>
-          <table className='w-full'>
-            <thead>
-              <tr className='bg-gray-50'>
-                <th className='table-header'>Item</th>
-                <th className='table-header'>Category</th>
-                <th className='table-header'>Current Stock</th>
-                <th className='table-header'>Reorder Level</th>
-                <th className='table-header'>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lowStockItems.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className='table-cell text-center text-gray-500 py-8'>
-                    All items have sufficient stock! 🎉
-                  </td>
-                </tr>
-              ) : (
-                lowStockItems.map((item: any) => (
-                  <tr key={item._id} className='hover:bg-gray-50'>
-                    <td className='table-cell font-semibold'>
-                      {item.itemName}
-                    </td>
-                    <td className='table-cell capitalize'>{item.category}</td>
-                    <td className='table-cell'>
-                      <span
-                        className={`font-bold ${
-                          item.currentStock === 0
-                            ? "text-red-600"
-                            : "text-orange-600"
-                        }`}>
-                        {item.currentStock} {item.unit}
-                      </span>
-                    </td>
-                    <td className='table-cell'>
-                      {item.reorderLevel} {item.unit}
-                    </td>
-                    <td className='table-cell'>
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-semibold ${
-                          item.currentStock === 0
-                            ? "bg-red-100 text-red-800"
-                            : "bg-orange-100 text-orange-800"
-                        }`}>
-                        {item.currentStock === 0 ? "OUT OF STOCK" : "LOW STOCK"}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Low Stock Table */}
+      <LowStock lowStockItems={lowStockItems} />
 
       {/* Commission Info */}
-      <StaffCommission userId={user?._id as Id<"users">} />
+      {user?._id && <StaffCommission userId={user._id as Id<"users">} />}
     </div>
   );
 }

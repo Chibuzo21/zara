@@ -9,8 +9,8 @@ import Link from "next/link";
 
 export default function AdjustPage() {
   const router = useRouter();
-  const adjustStock = useMutation(api.inventoryMutations.updateStock);
-  const inventoryItems = useQuery(api.inventory.getAll) || [];
+  const adjustStock = useMutation(api.inventory.inventoryMutations.updateStock);
+  const inventoryItems = useQuery(api.inventory.inventory.getAll) || [];
 
   const [formData, setFormData] = useState({
     itemId: "",

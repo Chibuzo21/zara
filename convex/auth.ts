@@ -7,6 +7,10 @@ import { v } from "convex/values";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [Password()],
+  session: {
+    totalDurationMs: 90 * 24 * 60 * 60 * 1000, // 90 days
+    inactiveDurationMs: 30 * 24 * 60 * 60 * 1000, // 30 days idle
+  },
   callbacks: {
     async createOrUpdateUser(ctx, args) {
       if (args.existingUserId) return args.existingUserId;

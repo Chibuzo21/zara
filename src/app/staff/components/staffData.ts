@@ -36,3 +36,18 @@ export const STATUSES = [
   { value: "inactive", label: "Inactive", color: "#6b7280" },
   { value: "suspended", label: "Suspended", color: "#ef4444" },
 ] as const;
+export const stats = [
+  { role: "Active", color: "text-green-600" },
+  {
+    role: "Production",
+    color: "text-blue-600",
+  },
+  {
+    role: "Packaging",
+    color: "text-green-600",
+  },
+  {
+    role: "Production",
+    color: "text-yellow-600",
+  },
+];

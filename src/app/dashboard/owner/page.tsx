@@ -15,17 +15,10 @@ import {
   BarChart,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { useRoleGuard } from "../../../../hooks/useRoleGuard";
 
 export default function OwnerDashboard() {
+  const { isAllowed, isLoading } = useRoleGuard(["owner", "admin"]);
   const stats = useQuery(api.sales.sales.getDashboardStats) as
     | DashboardStats
     | undefined;
@@ -38,6 +31,7 @@ export default function OwnerDashboard() {
     endDate: today,
     limit: 5,
   }) as TopProduct[] | undefined;
+  if (isLoading || !isAllowed) return null;
 
   if (stats === undefined || topProducts === undefined) {
     return (

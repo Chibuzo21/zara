@@ -1,9 +1,32 @@
-import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
+import {
+  convexAuthNextjsMiddleware,
+  createRouteMatcher,
+  nextjsMiddlewareRedirect,
+} from "@convex-dev/auth/nextjs/server";
 
-export default convexAuthNextjsMiddleware();
+const isPublicRoute = createRouteMatcher(["/login"]);
+
+export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
+  const isAuthenticated = await convexAuth.isAuthenticated();
+  const { pathname } = request.nextUrl;
+
+  // Unauthenticated — send to login
+  if (!isPublicRoute(request) && !isAuthenticated) {
+    return nextjsMiddlewareRedirect(request, "/login");
+  }
+
+  // Authenticated on login page — send to login form's destination
+  // Let the login form handle role-based routing, just get them off /login
+  if (pathname === "/login" && isAuthenticated) {
+    return nextjsMiddlewareRedirect(request, "/dashboard/owner");
+  }
+
+  // Authenticated on root — same, middleware can't know role so just bounce
+  if (pathname === "/" && isAuthenticated) {
+    return nextjsMiddlewareRedirect(request, "/dashboard/owner");
+  }
+});
 
 export const config = {
-  // The following matcher runs middleware on all routes
-  // except static assets.
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };

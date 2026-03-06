@@ -51,24 +51,6 @@ export const getWithPerformance = query({
     return { staff, performance };
   },
 });
-export const getUserByEmail = query({
-  args: { email: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", args.email))
-      .first();
-  },
-});
-export const getUserByStaffId = internalQuery({
-  args: { staffId: v.id("staff") },
-  handler: async (ctx, { staffId }) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("staffId", (q) => q.eq("staffId", staffId))
-      .unique();
-  },
-});
 
 // convex/users.ts
 

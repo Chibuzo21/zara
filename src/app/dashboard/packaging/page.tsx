@@ -13,6 +13,7 @@ import {
   Edit,
 } from "lucide-react";
 import { useState } from "react";
+import { useRoleGuard } from "../../../../hooks/useRoleGuard";
 
 const packaging = api.packaging.packaging;
 export default function PackagingDashboardPage() {
@@ -34,6 +35,11 @@ export default function PackagingDashboardPage() {
   const [editingTask, setEditingTask] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState("");
 
+  const { isAllowed, isLoading } = useRoleGuard([
+    "owner",
+    "admin",
+    "packaging",
+  ]);
   const totalToPack = tasks.reduce(
     (sum: number, task: any) => sum + task.targetQuantity,
     0,
@@ -105,6 +111,7 @@ export default function PackagingDashboardPage() {
     }
   };
 
+  if (isLoading || !isAllowed) return null;
   return (
     <div className='space-y-6'>
       {/* Header */}

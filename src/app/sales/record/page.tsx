@@ -9,6 +9,7 @@ import { formatCurrency } from "../../../../lib/utils";
 
 import { Id } from "../../../../convex/_generated/dataModel";
 import StaffCommission from "./component/staffCommission";
+import { useRoleGuard } from "../../../../hooks/useRoleGuard";
 
 type SaleItem = {
   productId: string;
@@ -19,6 +20,12 @@ type SaleItem = {
 };
 
 export default function RecordSalePage() {
+  const { isAllowed, isLoading } = useRoleGuard([
+    "owner",
+    "admin",
+    "sales",
+    "transport_sales",
+  ]);
   const router = useRouter();
   const user = useQuery(api.users.viewer);
   const products = useQuery(api.production.products.getActive) || [];
@@ -74,6 +81,7 @@ export default function RecordSalePage() {
     setItems(newItems);
   };
 
+  if (isLoading || !isAllowed) return null;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
