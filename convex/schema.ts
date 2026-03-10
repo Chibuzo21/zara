@@ -277,4 +277,54 @@ export default defineSchema({
     .index("by_staff", ["staffId"])
     .index("by_date", ["date"])
     .index("by_staff_and_date", ["staffId", "date"]),
+  // ONLINE STORE - CUSTOMER ORDERS
+  customerOrders: defineTable({
+    orderNumber: v.string(),
+    customerName: v.string(),
+    customerEmail: v.optional(v.string()),
+    customerPhone: v.string(),
+    deliveryAddress: v.optional(v.string()),
+    orderType: v.union(v.literal("pickup"), v.literal("delivery")),
+    items: v.array(
+      v.object({
+        productId: v.id("products"),
+        productName: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      }),
+    ),
+    subtotal: v.number(),
+    deliveryFee: v.number(),
+    totalAmount: v.number(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("confirmed"),
+      v.literal("preparing"),
+      v.literal("ready"),
+      v.literal("out_for_delivery"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+    ),
+    paymentMethod: v.union(
+      v.literal("cash_on_delivery"),
+      v.literal("cash_on_pickup"),
+      v.literal("transfer"),
+      v.literal("online"),
+    ),
+    paymentStatus: v.union(
+      v.literal("pending"),
+      v.literal("paid"),
+      v.literal("failed"),
+    ),
+    orderDate: v.string(),
+    deliveryDate: v.optional(v.string()),
+    deliveryTime: v.optional(v.string()),
+    specialInstructions: v.optional(v.string()),
+    processedBy: v.optional(v.id("users")),
+  })
+    .index("by_order_number", ["orderNumber"])
+    .index("by_status", ["status"])
+    .index("by_date", ["orderDate"])
+    .index("by_customer_phone", ["customerPhone"]),
 });

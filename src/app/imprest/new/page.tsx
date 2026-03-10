@@ -10,8 +10,8 @@ import { generateId, formatCurrency } from "../../../../lib/utils";
 
 export default function NewImprestPage() {
   const router = useRouter();
-  const createImprest = useMutation(api.imprestMutations.create);
-  const staff = useQuery(api.staff.getActive) || [];
+  const createImprest = useMutation(api.imprest.imprestMutations.create);
+  const staff = useQuery(api.staffs.staff.getActive) || [];
 
   const [formData, setFormData] = useState({
     requestNumber: generateId("IMP"),

@@ -10,8 +10,10 @@ import { calculateCommission, formatCurrency } from "../../../../lib/utils";
 
 export default function NewCommissionPage() {
   const router = useRouter();
-  const createCommission = useMutation(api.commissionMutations.create);
-  const staff = useQuery(api.staff.getActive) || [];
+  const createCommission = useMutation(
+    api.commission.commissionMutations.create,
+  );
+  const staff = useQuery(api.staffs.staff.getActive) || [];
 
   const [formData, setFormData] = useState({
     staffId: "",

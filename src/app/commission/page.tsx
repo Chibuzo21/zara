@@ -9,9 +9,11 @@ import { useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 export default function CommissionPage() {
-  const records = useQuery(api.commission.getAll) || [];
-  const approveCommission = useMutation(api.commissionMutations.approve);
-  const markAsPaid = useMutation(api.commissionMutations.markAsPaid);
+  const records = useQuery(api.commission.commission.getAll) || [];
+  const approveCommission = useMutation(
+    api.commission.commissionMutations.approve,
+  );
+  const markAsPaid = useMutation(api.commission.commissionMutations.markAsPaid);
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState<string | null>(null);

@@ -13,6 +13,7 @@ import type * as attendance from "../attendance.js";
 import type * as auth from "../auth.js";
 import type * as commission_commission from "../commission/commission.js";
 import type * as commission_commissionMutations from "../commission/commissionMutations.js";
+import type * as customerOrders from "../customerOrders.js";
 import type * as http from "../http.js";
 import type * as imprest_imprest from "../imprest/imprest.js";
 import type * as imprest_imprestMutations from "../imprest/imprestMutations.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "commission/commission": typeof commission_commission;
   "commission/commissionMutations": typeof commission_commissionMutations;
+  customerOrders: typeof customerOrders;
   http: typeof http;
   "imprest/imprest": typeof imprest_imprest;
   "imprest/imprestMutations": typeof imprest_imprestMutations;

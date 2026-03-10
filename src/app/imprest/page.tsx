@@ -16,11 +16,11 @@ import { useState } from "react";
 import type { Id } from "../../../convex/_generated/dataModel";
 
 export default function ImprestPage() {
-  const requests = useQuery(api.imprest.getAll) || [];
-  const approveImprest = useMutation(api.imprestMutations.approve);
-  const rejectImprest = useMutation(api.imprestMutations.reject);
-  const disburseImprest = useMutation(api.imprestMutations.disburse);
-  const retireImprest = useMutation(api.imprestMutations.retire);
+  const requests = useQuery(api.imprest.imprest.getAll) || [];
+  const approveImprest = useMutation(api.imprest.imprestMutations.approve);
+  const rejectImprest = useMutation(api.imprest.imprestMutations.reject);
+  const disburseImprest = useMutation(api.imprest.imprestMutations.disburse);
+  const retireImprest = useMutation(api.imprest.imprestMutations.retire);
 
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState<string | null>(null);

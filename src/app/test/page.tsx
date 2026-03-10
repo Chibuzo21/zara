@@ -11,8 +11,8 @@ export default function SetupOwner() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
+  const handleCreate = async () => {
+    // e.preventDefault();
     try {
       await createOwner({ email, fullName: name, password });
       alert("Owner created successfully!");
