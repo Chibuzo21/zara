@@ -14,6 +14,8 @@ import type * as auth from "../auth.js";
 import type * as commission_commission from "../commission/commission.js";
 import type * as commission_commissionMutations from "../commission/commissionMutations.js";
 import type * as customerOrders from "../customerOrders.js";
+import type * as debtors_debtorMutations from "../debtors/debtorMutations.js";
+import type * as debtors_debtorQueries from "../debtors/debtorQueries.js";
 import type * as http from "../http.js";
 import type * as imprest_imprest from "../imprest/imprest.js";
 import type * as imprest_imprestMutations from "../imprest/imprestMutations.js";
@@ -29,6 +31,8 @@ import type * as sales_sales from "../sales/sales.js";
 import type * as sales_salesMutations from "../sales/salesMutations.js";
 import type * as staffs_staff from "../staffs/staff.js";
 import type * as staffs_staffMutation from "../staffs/staffMutation.js";
+import type * as stock_stockMutations from "../stock/stockMutations.js";
+import type * as stock_stockQueries from "../stock/stockQueries.js";
 import type * as suppliers from "../suppliers.js";
 import type * as users from "../users.js";
 
@@ -45,6 +49,8 @@ declare const fullApi: ApiFromModules<{
   "commission/commission": typeof commission_commission;
   "commission/commissionMutations": typeof commission_commissionMutations;
   customerOrders: typeof customerOrders;
+  "debtors/debtorMutations": typeof debtors_debtorMutations;
+  "debtors/debtorQueries": typeof debtors_debtorQueries;
   http: typeof http;
   "imprest/imprest": typeof imprest_imprest;
   "imprest/imprestMutations": typeof imprest_imprestMutations;
@@ -60,6 +66,8 @@ declare const fullApi: ApiFromModules<{
   "sales/salesMutations": typeof sales_salesMutations;
   "staffs/staff": typeof staffs_staff;
   "staffs/staffMutation": typeof staffs_staffMutation;
+  "stock/stockMutations": typeof stock_stockMutations;
+  "stock/stockQueries": typeof stock_stockQueries;
   suppliers: typeof suppliers;
   users: typeof users;
 }>;

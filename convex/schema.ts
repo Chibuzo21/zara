@@ -327,4 +327,59 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_date", ["orderDate"])
     .index("by_customer_phone", ["customerPhone"]),
+
+  dailyStock: defineTable({
+    staffId: v.id("staff"),
+    recordedBy: v.id("users"),
+    entryDate: v.string(), // "YYYY-MM-DD"
+    productId: v.id("products"),
+    productName: v.optional(v.string()),
+    openingQty: v.number(),
+    damagedQty: v.number(),
+    notes: v.optional(v.string()),
+  })
+    .index("by_date", ["entryDate"])
+    .index("by_staff", ["staffId"])
+    .index("by_staff_and_date", ["staffId", "entryDate"])
+    .index("by_product_and_date", ["productId", "entryDate"]),
+
+  debtorLedger: defineTable({
+    saleId: v.id("sales"), // the credit sale that created this debt
+    salesStaffId: v.id("staff"), // staff who made the sale
+    recordedBy: v.id("users"), // user who recorded the sale
+    customerName: v.string(), // debtor name (copied from sale)
+    saleDate: v.string(), // "YYYY-MM-DD"
+    originalAmount: v.number(), // full amount owed at time of sale
+    amountPaid: v.number(), // cumulative amount paid so far
+    balance: v.number(), // originalAmount - amountPaid
+    status: v.union(
+      v.literal("outstanding"), // nothing paid yet
+      v.literal("partial"), // some paid, still owes
+      v.literal("settled"), // fully paid
+    ),
+    settledDate: v.optional(v.string()), // "YYYY-MM-DD" when fully settled
+    notes: v.optional(v.string()),
+  })
+    .index("by_staff", ["salesStaffId"])
+    .index("by_sale", ["saleId"])
+    .index("by_status", ["status"])
+    .index("by_customer", ["customerName"])
+    .index("by_staff_and_status", ["salesStaffId", "status"]),
+
+  // Each repayment row now links to a debtorLedger entry.
+  // REPLACE your existing debtorRepayments table definition with this one.
+  debtorRepayments: defineTable({
+    debtorLedgerId: v.id("debtorLedger"), // which debt this repayment reduces
+    staffId: v.id("staff"), // staff receiving the payment
+    recordedBy: v.id("users"),
+    repaymentDate: v.string(), // "YYYY-MM-DD"
+    debtorName: v.string(), // denormalised for easy display
+    amount: v.number(), // amount paid in this repayment
+    note: v.optional(v.string()),
+    balanceAfter: v.number(), // balance remaining after this payment
+  })
+    .index("by_date", ["repaymentDate"])
+    .index("by_staff", ["staffId"])
+    .index("by_staff_and_date", ["staffId", "repaymentDate"])
+    .index("by_ledger", ["debtorLedgerId"]),
 });

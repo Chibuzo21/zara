@@ -24,7 +24,41 @@ export const create = mutation({
     location: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("sales", args);
+    const saleId = await ctx.db.insert("sales", {
+      saleDate: args.saleDate,
+      productId: args.productId,
+      productName: args.productName,
+      quantitySold: args.quantitySold,
+      unitPrice: args.unitPrice,
+      totalAmount: args.totalAmount,
+      salesStaffId: args.salesStaffId,
+      paymentMethod: args.paymentMethod,
+      customerName: args.customerName,
+      notes: args.notes,
+      recordedBy: args.recordedBy,
+      saleType: args.saleType,
+      location: args.location,
+    });
+    if (
+      args.paymentMethod === "credit" &&
+      args.salesStaffId &&
+      args.recordedBy
+    ) {
+      await ctx.db.insert("debtorLedger", {
+        saleId,
+        salesStaffId: args.salesStaffId,
+        recordedBy: args.recordedBy,
+        customerName: args.customerName ?? "Unknown Customer",
+        saleDate: args.saleDate,
+        originalAmount: args.totalAmount,
+        amountPaid: 0,
+        balance: args.totalAmount,
+        status: "outstanding",
+        notes: args.notes,
+      });
+    }
+
+    return saleId;
   },
 });
 
