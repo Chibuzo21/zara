@@ -382,4 +382,25 @@ export default defineSchema({
     .index("by_staff", ["staffId"])
     .index("by_staff_and_date", ["staffId", "repaymentDate"])
     .index("by_ledger", ["debtorLedgerId"]),
+  // ─── ADD THIS TABLE inside defineSchema({...}) in convex/schema.ts ───────────
+  // Place it after the attendance table block
+
+  staffPenalties: defineTable({
+    staffId: v.id("staff"),
+    amount: v.number(),
+    reason: v.string(),
+    category: v.union(
+      v.literal("lateness"),
+      v.literal("misconduct"),
+      v.literal("damage"),
+      v.literal("absence"),
+      v.literal("other"),
+    ),
+    penaltyDate: v.string(), // "YYYY-MM-DD"
+    recordedBy: v.id("users"),
+    notes: v.optional(v.string()),
+  })
+    .index("by_staff", ["staffId"])
+    .index("by_date", ["penaltyDate"])
+    .index("by_staff_and_date", ["staffId", "penaltyDate"]),
 });

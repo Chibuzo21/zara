@@ -1,5 +1,6 @@
-import { Edit2, Trash2 } from "lucide-react";
+import { Edit2, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
+
 import React from "react";
 import { iTableParams } from "./types";
 
@@ -107,6 +108,13 @@ export default function StaffTable({
                   {/* Actions */}
                   <td className='px-5 py-4'>
                     <div className='flex items-center gap-1'>
+                      <Link
+                        href={`/staff/${member._id}`}
+                        className='p-2 rounded-lg text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-colors duration-150'
+                        title='View'>
+                        <Eye size={15} strokeWidth={2} />
+                      </Link>
+
                       <Link
                         href={`/staff/${member._id}/edit`}
                         className='p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-150'

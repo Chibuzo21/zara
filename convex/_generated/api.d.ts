@@ -29,6 +29,7 @@ import type * as production_products from "../production/products.js";
 import type * as production_productsMutations from "../production/productsMutations.js";
 import type * as sales_sales from "../sales/sales.js";
 import type * as sales_salesMutations from "../sales/salesMutations.js";
+import type * as staffs_penalties from "../staffs/penalties.js";
 import type * as staffs_staff from "../staffs/staff.js";
 import type * as staffs_staffMutation from "../staffs/staffMutation.js";
 import type * as stock_stockMutations from "../stock/stockMutations.js";
@@ -64,6 +65,7 @@ declare const fullApi: ApiFromModules<{
   "production/productsMutations": typeof production_productsMutations;
   "sales/sales": typeof sales_sales;
   "sales/salesMutations": typeof sales_salesMutations;
+  "staffs/penalties": typeof staffs_penalties;
   "staffs/staff": typeof staffs_staff;
   "staffs/staffMutation": typeof staffs_staffMutation;
   "stock/stockMutations": typeof stock_stockMutations;
