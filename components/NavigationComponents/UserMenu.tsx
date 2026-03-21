@@ -15,7 +15,7 @@ export default function UserMenu({ fullName, role, onSignOut }: UserMenuProps) {
     .toUpperCase();
 
   return (
-    <div className='hidden md:flex items-center gap-3'>
+    <div className='flex items-center gap-3'>
       {/* Avatar + name */}
       <div className='flex items-center gap-2.5'>
         <div className='w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-bold flex-shrink-0'>
@@ -35,7 +35,7 @@ export default function UserMenu({ fullName, role, onSignOut }: UserMenuProps) {
       {/* Logout */}
       <button
         onClick={onSignOut}
-        className='flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors'>
+        className='lg:flex hidden items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors'>
         <LogOut size={14} strokeWidth={2} />
         Logout
       </button>

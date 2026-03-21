@@ -39,7 +39,7 @@ export const STATUSES = [
 export const stats = [
   { role: "Active", color: "text-green-600" },
   {
-    role: "Production",
+    role: "Sales",
     color: "text-blue-600",
   },
   {

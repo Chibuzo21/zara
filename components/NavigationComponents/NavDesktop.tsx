@@ -23,7 +23,9 @@ export default function NavDesktop({ items, pathname }: NavDesktopProps) {
                 ? "bg-rose-500 text-white"
                 : "text-gray-500 hover:text-rose-500 hover:bg-rose-50"
             }`}>
-            <Icon size={14} strokeWidth={2} />
+            <span className='hidden xl:block'>
+              <Icon size={14} strokeWidth={2} />
+            </span>
             {item.label}
           </Link>
         );

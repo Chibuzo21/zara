@@ -45,13 +45,13 @@ export default function NavMobile({
 
         {/* User footer */}
         <div className='mt-2 pt-3 border-t border-gray-50 px-4'>
-          <div className='flex items-center justify-between'>
-            <div>
+          <div className='flex  items-center justify-end'>
+            {/* <div>
               <p className='text-sm font-semibold text-gray-800'>{fullName}</p>
               <p className='text-xs text-gray-400 capitalize mt-0.5'>
                 {role.replace(/_/g, " ")}
               </p>
-            </div>
+            </div> */}
             <button
               onClick={onSignOut}
               className='flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors'>

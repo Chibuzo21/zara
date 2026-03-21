@@ -4,7 +4,7 @@ import React from "react";
 
 export default function InventoryHeader() {
   return (
-    <div className='flex items-center justify-between'>
+    <div className='flex md:flex-row flex-col items-center justify-between'>
       <div>
         <h1 className='text-3xl font-bold text-gray-900'>
           Inventory Management
